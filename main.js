@@ -1,3 +1,27 @@
+const STAR_COUNT = 1500;
+
+
+const NAMED_STARS = [
+  {
+    name: "Polaris",
+    bayer: "α UMi",
+    ra: raToRad("02:31:49.09"),
+    dec: decToRad("+89:15:50.8")
+  },
+  {
+    name: "Sirius",
+    bayer: "α CMa",
+    ra: raToRad("06:45:08.92"),
+    dec: decToRad("-16:42:58.0")
+  },
+  {
+    name: "Betelgeuse",
+    bayer: "α Ori",
+    ra: raToRad("05:55:10.31"),
+    dec: decToRad("+07:24:25.4")
+  }
+];
+
 const CONSTELLATION_NAMES = {
   And: "Andromeda",
   Ant: "Antlia",
@@ -156,17 +180,7 @@ const atmosphere = {
    Star generation (angular sky)
 ================================ */
 
-const STAR_COUNT = 1500;
-// const stars = [];
 
-// for (let i = 0; i < STAR_COUNT; i++) {
-//   stars.push({
-//     az: Math.random() * Math.PI * 2,      // azimuth
-//     alt: (Math.random() - 0.1) * Math.PI * 0.55,   // altitude (above horizon)
-//     mag: Math.random() * 1.5 + 0.3,       // brightness proxy
-//     a: Math.random() * 0.5 + 0.4
-//   });
-// }
 
 let stars = [];
 let starById = {};
@@ -177,6 +191,38 @@ function indexStars() {
     starById[s.id] = s;
   }
 }
+
+function angularDistance(a, b) {
+  return Math.acos(
+    Math.sin(a.dec) * Math.sin(b.dec) +
+    Math.cos(a.dec) * Math.cos(b.dec) *
+    Math.cos(a.ra - b.ra)
+  );
+}
+
+// TODO: check
+function labelNamedStars(stars) {
+  const MAX_DIST = 0.001; // ~1.7 arcmin
+
+  for (const named of NAMED_STARS) {
+    let best = null;
+    let bestDist = Infinity;
+
+    for (const s of stars) {
+      const d = angularDistance(s, named);
+      if (d < bestDist) {
+        bestDist = d;
+        best = s;
+      }
+    }
+
+    if (best && bestDist < MAX_DIST) {
+      best.name = named.name;
+      best.bayer = named.bayer;
+    }
+  }
+}
+
 
 fetch("stars.json")
   .then(res => res.json())
@@ -191,7 +237,17 @@ fetch("stars.json")
         a: Math.max(0.2, 1.0 - Number(s.MAG) / 7)
       }));
       indexStars(); // ← REQUIRED
+    labelNamedStars(stars);
   });
+
+
+
+
+
+
+
+
+
 
 
 
@@ -385,6 +441,15 @@ function drawBackground() {
    Draw sky (clipped dome)
 ================================ */
 
+
+  function getStarTooltipText(star) {
+    if (star.name) {
+      return `${star.name}${star.bayer ? ` (${star.bayer})` : ""}\nMag ${star.mag.toFixed(2)}`;
+    }
+    return `Star\nMag ${star.mag.toFixed(2)}`;
+  }
+
+
 function drawSky() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -437,6 +502,7 @@ function drawSky() {
 
 
 
+
   const hoveredStar = findHoveredStar();
   const hoveredConstellation = hoveredStar
     ? null
@@ -447,8 +513,9 @@ function drawSky() {
       mouse.x + 12,
       mouse.y + 12,
       hoveredStar
-        ? `${hoveredStar.name ?? "Star"}\nMag ${hoveredStar.mag.toFixed(2)}`
-        : hoveredConstellation
+      ? getStarTooltipText(hoveredStar)
+      : hoveredConstellation
+
     );
   }
 
