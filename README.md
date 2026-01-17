@@ -1,6 +1,6 @@
 # Planetarium 🌌
 
-> **[Live Demo](https://nikgorbachev.github.io/planetarium_js/)** > *Click above to visit the live experience!*
+> **[Live Demo](https://nikgorbachev.github.io/planetarium_js/)** > *Click this link to visit the live experience!*
 
 Welcome to **Planetarium - JS**, a browser-based interactive night sky renderer. This project simulates the celestial sphere using real astronomical data, projecting thousands of stars and constellations onto a 2D HTML5 Canvas. 
 
