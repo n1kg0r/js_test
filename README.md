@@ -53,9 +53,7 @@ Once we have the Altitude and Azimuth, we project the star onto a 3D unit sphere
 We apply a rotation matrix based on where the user is looking (`camera.yaw` and `camera.pitch`). This rotates the entire universe around the camera so that the correct stars fall in front of the lens.
 
 ### 5. Perspective Projection (3D to 2D)
-Finally, we map the 3D star coordinates onto the flat 2D plane of your screen using a perspective divide.
-* **Formula:** $x_{screen} = \text{center}_x + (y' / z') \cdot f$
-* If $z'$ (depth) is negative, the star is behind us and is clipped (not drawn).
+Finally, we map the 3D star coordinates onto the flat 2D plane of your screen using a perspective divide
 
 ---
 
